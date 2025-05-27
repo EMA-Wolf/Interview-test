@@ -1,33 +1,36 @@
-import {Request, Response} from 'express';
+import { Request, Response } from 'express';
 import Blog from '../models/blog.model';
 
-//Create a new blog post
-export const createBlogPost = async (req: Request, res: Response) => {
+// Create a new blog post
+export const createBlogPost = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {title, content, author} = req.body;
+        const { title, content, author } = req.body;
         if (!title || !content || !author) {
             console.error('Missing required fields: title, content, or author');
-            return res.status(400).json({message: 'Missing required fields: title, content, or author'});
+            res.status(400).json({ message: 'Missing required fields: title, content, or author' });
+            return; 
         }
-        const newBlogPost = new Blog({title, content, author});
+        const newBlogPost = new Blog({ title, content, author });
         await newBlogPost.save();
 
         // edit the new blog post to include only the necessary fields
-        let finalBlogPost = {id: newBlogPost._id, title: newBlogPost.title, content: newBlogPost.content, author: newBlogPost.author, createdAt: newBlogPost.createdAt};
+        let finalBlogPost = { id: newBlogPost._id, title: newBlogPost.title, content: newBlogPost.content, author: newBlogPost.author, createdAt: newBlogPost.createdAt };
 
         // Log the newly created blog post
         console.log('New blog post created:', finalBlogPost);
         // Return a 201 Created response with the new blog post
-        return res.status(201).json(finalBlogPost);
+        res.status(201).json(finalBlogPost);
+        return
     } catch (error) {
         console.error('Error creating blog post:', error);
         // Return a 500 Internal Server Error response
-        return res.status(500).json({message: 'Error creating blog post', error});
+        res.status(500).json({ message: 'Error creating blog post', error });
+        return;
     }
 };
 
 // Get all blog posts
-export const getAllBlogPosts = async (req: Request, res: Response) => {
+export const getAllBlogPosts = async (req: Request, res: Response): Promise<void> => {
     try {
         const blogPosts = await Blog.find();
 
@@ -42,11 +45,11 @@ export const getAllBlogPosts = async (req: Request, res: Response) => {
 
         console.log('Retrieved all blog posts successfully');
         // Return a 200 OK response with the transformed list of blog posts
-        return res.status(200).json(transformedBlogPosts);
+        res.status(200).json(transformedBlogPosts);
     } catch (error) {
         console.error('Error retrieving blog posts:', error);
         // Return a 500 Internal Server Error response
-        return res.status(500).json({ message: 'Error retrieving blog posts', error });
+        res.status(500).json({ message: 'Error retrieving blog posts', error });
     }
 };
 
@@ -59,7 +62,8 @@ export const getBlogPostById = async (req: Request, res: Response) => {
         if (!id) {
             console.error('Blog post ID is required');
             // Return a 400 Bad Request response
-            return res.status(400).json({message: 'Blog post ID is required'});
+            res.status(400).json({ message: 'Blog post ID is required' });
+            return;
         }
 
         // Find the blog post by ID
@@ -67,7 +71,8 @@ export const getBlogPostById = async (req: Request, res: Response) => {
         if (!blogPost) {
             console.error(`Blog post with ID ${id} not found`);
             // Return a 404 Not Found response
-            return res.status(404).json({message: 'Blog post not found'});
+            res.status(404).json({ message: 'Blog post not found' });
+            return;
         }
 
         let finalBlogPost = {
@@ -79,42 +84,45 @@ export const getBlogPostById = async (req: Request, res: Response) => {
         };
 
         // Return a 200 OK response with the blog post
-        return res.status(200).json(finalBlogPost);
+        res.status(200).json(finalBlogPost);
     } catch (error) {
         console.error('Error retrieving blog post:', error);
         // Return a 500 Internal Server Error response
-        return res.status(500).json({message: 'Error retrieving blog post', error});
+       res.status(500).json({ message: 'Error retrieving blog post', error });
     }
 };
 
 // Update a blog post by ID
-export const updateBlogPostById = async (req: Request, res: Response) => {
+export const updateBlogPostById = async (req: Request, res: Response): Promise<void> => {
     try {
         const {id} = req.params;
         // Validate the ID
         if (!id) {
             console.error('Blog post ID is required');
             // Return a 400 Bad Request response
-            return res.status(400).json({message: 'Blog post ID is required'});
+            res.status(400).json({ message: 'Blog post ID is required' });
+            return;
         }
 
-        const {title, content, author} = req.body;
+        const { title, content, author } = req.body;
 
         // Validate the required fields
         if (!title || !content || !author) {
             console.error('Missing required fields: title, content, or author');
             // Return a 400 Bad Request response
-            return res.status(400).json({message: 'Missing required fields: title, content, or author'});
+            res.status(400).json({ message: 'Missing required fields: title, content, or author' });
+            return;
         }
 
         // Find the blog post by ID and update it
-        const updatedBlogPost = await Blog.findByIdAndUpdate(id, {title, content, author, updatedAt: Date.now()}, {new: true});
+        const updatedBlogPost = await Blog.findByIdAndUpdate(id, { title, content, author, updatedAt: Date.now() }, { new: true });
 
         // Check if the blog post was found and updated
         if (!updatedBlogPost) {
             console.error(`Blog post with ID ${id} not found`);
             // Return a 404 Not Found response
-            return res.status(404).json({message: 'Blog post not found'});
+            res.status(404).json({ message: 'Blog post not found' });
+            return 
         }
 
         // Transform the updated blog post to include only the necessary fields
@@ -127,16 +135,18 @@ export const updateBlogPostById = async (req: Request, res: Response) => {
             updatedAt: updatedBlogPost.updatedAt,
         };
         // Return a 200 OK response with the updated blog post
-        return res.status(200).json(finalUpdatedBlogPost);
+        res.status(200).json(finalUpdatedBlogPost);
+        return;
     } catch (error) {
         console.error('Error updating blog post:', error);
         // Return a 500 Internal Server Error response
-        return res.status(500).json({message: 'Error updating blog post', error});
+        res.status(500).json({ message: 'Error updating blog post', error });
+        return;
     }
 };
 
 // Delete a blog post by ID
-export const deleteBlogPostById = async (req: Request, res: Response) => {
+export const deleteBlogPostById = async (req: Request, res: Response): Promise<void> => {
     try {
         const {id} = req.params;
 
@@ -144,7 +154,8 @@ export const deleteBlogPostById = async (req: Request, res: Response) => {
         if (!id) {
             console.error('Blog post ID is required');
             // Return a 400 Bad Request response
-            return res.status(400).json({message: 'Blog post ID is required'});
+            res.status(400).json({ message: 'Blog post ID is required' });
+            return;
         }
 
         // Find the blog post by ID and delete it
@@ -154,16 +165,16 @@ export const deleteBlogPostById = async (req: Request, res: Response) => {
         if (!deletedBlogPost) {
             console.error(`Blog post with ID ${id} not found`);
             // Return a 404 Not Found response
-            return res.status(404).json({message: 'Blog post not found'});
+            res.status(404).json({ message: 'Blog post not found' });
+            return;
         }
-        
         // Log the successful deletion of the blog post
         console.log(`Blog post with ID ${id} deleted successfully`);
         // Return a 200 OK response with a success message
-        return res.status(200).json({message: 'Blog post deleted successfully'});
+        res.status(200).json({ message: 'Blog post deleted successfully' });
     } catch (error) {
         console.error('Error deleting blog post:', error);
         // Return a 500 Internal Server Error response
-        return res.status(500).json({message: 'Error deleting blog post', error});
+        res.status(500).json({ message: 'Error deleting blog post', error });
     }
 }

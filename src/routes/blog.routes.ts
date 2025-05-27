@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { createBlogPost, getAllBlogPosts, getBlogPostById, updateBlogPostById, deleteBlogPostById } from '../controllers/blog.controller';
+import {createBlogPost, getAllBlogPosts, getBlogPostById, updateBlogPostById, deleteBlogPostById } from '../controllers/blog.controller';
 
 // Create a new blog post
 router.post('/blogs', createBlogPost);
