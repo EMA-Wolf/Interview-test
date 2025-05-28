@@ -5,6 +5,13 @@ import Blog from '../models/blog.model';
 export const createBlogPost = async (req: Request, res: Response): Promise<void> => {
     try {
         const { title, content, author } = req.body;
+        // Code to check the data type of title, content, and author
+        if (typeof title !== 'string' || typeof content !== 'string' || typeof author !== 'string') {
+            console.error('Invalid data types for title, content, or author');
+            res.status(400).json({ message: 'Invalid data types for title, content, or author' });
+            return; 
+        }
+        // Validate the required fields
         if (!title || !content || !author) {
             console.error('Missing required fields: title, content, or author');
             res.status(400).json({ message: 'Missing required fields: title, content, or author' });
@@ -105,6 +112,13 @@ export const updateBlogPostById = async (req: Request, res: Response): Promise<v
         }
 
         const { title, content, author } = req.body;
+        // Code to check the data type of title, content, and author
+        if (typeof title !== 'string' || typeof content !== 'string' || typeof author !== 'string') {
+            console.error('Invalid data types for title, content, or author');
+            // Return a 400 Bad Request response
+            res.status(400).json({ message: 'Invalid data types for title, content, or author' });
+            return;
+        }
 
         // Validate the required fields
         if (!title || !content || !author) {
